@@ -17,19 +17,30 @@ Requirements:
 * Qt5
 
 On MacOS and Linux:
+
 1.  Create a build directory and cd into it.
+
 2.  `cmake -DQT_VERSION_DIR=<path to Qt5 install dir>  <path to ThermalTracker src directory>`
+
 3.  `make`
 
 On Windows:
+
 1.  Install [MSYS](http://downloads.sourceforge.net/mingw/MSYS-1.0.11.exe)
+
 2.  Install [cmake](https://cmake.org/download/)
+
 3.  Install Qt.  Be sure to enable the MinGW install option.
+
 4.  Install [openCV](https://github.com/Itseez/opencv/archive/2.4.12.3.zip)
+
 5.  Install [boost](https://sourceforge.net/projects/boost/) using these commands at the Windows Command Prompt:
+
   * `bootstrap mingw`
   * `b2 toolset=gcc --build-type=complete stage`
+
 6.  Build ThermalTracker in MSYS:
+
   * Create a build directory and cd into it.
   * `cmake -G"MSYS Makefiles" -DCMAKE_PREFIX_PATH=<full path to Qt root>  \`
             `-DQT_VERSION_DIR=<full path to Qt root> -DBOOST_ROOT=<full path to boost lib dir> \`
