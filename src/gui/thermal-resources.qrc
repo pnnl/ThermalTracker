@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/PNNL_Logo_FULL_COLOR_RGB.gif</file>
+        <file>res/glyphicons-195-circle-question-mark.png</file>
+        <file>res/banner_mod.png</file>
+        <file>res/banner_mod_background.png</file>
+    </qresource>
+</RCC>
