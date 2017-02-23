@@ -130,7 +130,6 @@ struct Track_Statistics {
 	{
 		//cout << "Track_Statistics::calc() " << endl;
 		id = trk._id;
-		cout << "     start" << endl;
 		start_x     = trk.blobs[0].rect.x + trk.blobs[0].centroidx;
 		start_y     = trk.blobs[0].rect.y + trk.blobs[0].centroidy;
 		start_xrel = start_x / imwidth;
@@ -161,7 +160,6 @@ struct Track_Statistics {
 		
 		//cout << "     total pix" << endl;
 		total_distance_pix = 0.0;
-		cout << "     more dec" << endl;
 		int sum_npoints = 0;
 		int sum_width = 0;
 		int sum_height = 0;
@@ -197,12 +195,12 @@ struct Track_Statistics {
 					points.push_back(Point2f(x2,y2));
 					points.push_back(Point2f(x3,y3));
 					Vec4f line_fit;
-					cout << "fitting line..." ;
+					//cout << "fitting line..." ;
           InputArray arr(points);
 					fitLine(points,line_fit, CV_DIST_L2, 0.0, 0.01, 0.01);
 					// TODO:  Determine correct direction?  will angle be 0 to 360?
 					double flight_dir = atan2(line_fit[1],line_fit[0]) * 180/PI;
-					cout << " angle is " << flight_dir << " deg." << endl;
+					//cout << " angle is " << flight_dir << " deg." << endl;
 				}
 			}
 			

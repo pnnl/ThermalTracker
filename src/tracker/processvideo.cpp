@@ -129,14 +129,16 @@ for (int k=0; k<bg.N; ++k)
   }
   cvtColor(newFrame.reshape(0,1),grayFrame,CV_BGR2GRAY);
   grayFrame.convertTo(bg.win.row(k), CV_32F, 1.0f/maxChannelVal, 0);
-  //grayFrame.reshape(0,1).copyTo(bg.win.row(k));
   
+  // the following is nice at command line but not so good
+  // in the GUI
+  /*
   cout << "\r" << setw(5) << k+1 << ": ";
   int X = ((float)(k+1)/bg.N) *10;
   cout << std::string(X, '|');
   cout << std::string(10-X, '-');
   cout.flush();
-
+  */
 }
 cout << " done!" << endl;
 reduce(bg.win, bg.mean, 0, CV_REDUCE_AVG);
@@ -154,88 +156,7 @@ minMaxIdx(bg.stdv, &minVal, &maxVal, 0, 0);
 cout << "background intensity standard deviation from " << minVal << " to " << maxVal << endl;
 
 iFrame += bg.N;  // frame index
-/*    
-for (int k=1;k<bg.N;++k)
-{
-  capture >> newFrame;  // 3-channel BGR, all equal intensity
-  cvtColor(newFrame,grayFrame,CV_BGR2GRAY);
-  accumulator += Mat_<float>(grayFrame);
-} // for all frames
 
-capture.release(); // close video file
-Mat background = accumulator/bg.N;
-Mat backgroundNew(background.size(),background.type()); // used for updates
-
-cout << "Estimating background standard deviation..." << endl;
-
-capture.open(vfilepath.string()); // re-open video file
-for (int k=0;k<bg.N;++k)
-{
-  capture >> newFrame;  // 3-channel RGB or BGR, all equal intensity
-  cvtColor(newFrame,grayFrame,CV_BGR2GRAY);
-  Mat sqrDiff;
-  pow(background - Mat_<float>(grayFrame),2.0f,sqrDiff);
-  accumulator += sqrDiff;
-} // for all frames
-
-double minVal, maxVal;
-minMaxIdx(background*(1.0f/maxChannelVal), &minVal, &maxVal);
-cout << "background values from " << minVal << " to " << maxVal << endl;
-
-Mat bgStdDev;
-sqrt(accumulator/(bg.N-1),bgStdDev);
-minMaxIdx(bgStdDev*(1.0f/maxChannelVal), &minVal, &maxVal);
-cout << "standard deviation from " << minVal << " to " << maxVal << endl;
-  
-int iBgFrame = bg.N; // index of next frame for background
-*/
-
-//************************************************************************** 
-// DO VIDEO PEAK STORE
-//************************************************************************** 
- /* 
-cout << endl <<  "video peak store" << endl;
-
-// OPEN VIDEO FILE
-VideoCapture capture_vps(vfilepath.string());
-
-if ( !capture_vps.isOpened() )
-{
-  cerr << "Could not open file " << vfilepath.string() << endl;
-  return -1;
-}
-cout << "opened video file for vps" << endl;
-  
-int   Npixels = frameHeight*frameWidth;
-
-std::vector< std::vector<PixelValue> > frameStack;
-try {
-  frameStack = std::vector< std::vector<PixelValue> >(vpsFrames, std::vector<PixelValue>(Npixels));
-} catch (std::bad_alloc) {
-  cerr << "Unable to allocate memory. Try a smaller window size.";
-  return -1;
-}
-
-Mat currentFrame, currentFrameGray; // temporary storage of current frame retreived from video
-const PixelValue  *frame; // for accessing frame pixels
-
-// read in first half window of frames
-int j,k; // loop iterator
-for (k=0;k<halfFrames;++k)
-{
-  capture_vps >> currentFrame;           // 3-channel BGR
-  cvtColor(currentFrame, grayFrame, CV_BGR2GRAY);
-  grayFrame.convertTo(currentFrameGray, CV_32F, 1.0f/(pow(2.0f,(int)(currentFrame.elemSize1()*8))-1), 0);
-  // copy pixels from frame, stored row-by-row
-  frame = currentFrameGray.ptr<PixelValue>(0); // pointer to pixel data
-  for (j=0;j<currentFrameGray.total();j++)
-  {
-    frameStack[k][j] = 0.0;
-    frameStack[k+halfFrames][j] = frame[j]; // save frame as 1D row vector
-  }
-}
-iFrame += halfFrames;
-*/
 int vpsFrames  = ceil((double)params.windowSize * params.framesPerSecond);
 vpsFrames = std::min(vpsFrames, numFrames);
 vpsFrames = vpsFrames + (vpsFrames % 2); // make even
@@ -278,30 +199,7 @@ while ( ind < (bg.N - vpsFrames + 1) )
   // Video Peak Store
   // Mat frameStack(bg.win.rowRange(bg.N - vpsFrames,bg.N));
   Mat frameStack(bg.win.rowRange(ind, ind + vpsFrames));
-
-  /*
-  // move last half of last window to first half of current window
-  for (int k=0;k<halfFrames;++k)
-    for (int j=0;j<bg.Npixels;j++)
-      frameStack[k][j] = frameStack[k+halfFrames][j]; 
-    // load new frames
-    newFrames = std::min(halfFrames, framesRemaining);
-    for (int k=0;k<newFrames;k++)
-    {
-      capture_vps >> currentFrame;           // 3-channel RGB or BGR
-      cvtColor(currentFrame, grayFrame, CV_BGR2GRAY);
-      grayFrame.convertTo(currentFrameGray, CV_32F, 1.0f/(pow(2.0f,(int)(currentFrame.elemSize1()*8))-1), 0);
-      // copy pixels from frame, stored row-by-row
-      frame = currentFrameGray.ptr<PixelValue>(0); // pointer to pixel data
-      for (int j=0;j<currentFrameGray.total();j++)
-      {
-        frameStack[k+halfFrames][j] = frame[j]; // save frame as 1D row vector
-      }
-    
-    }
-    iFrame += newFrames;
-  */
-  
+ 
   
   // get peak values and associated frame for each pixel
   cout << "storing peak values" << endl;
@@ -330,22 +228,7 @@ while ( ind < (bg.N - vpsFrames + 1) )
   // create output VPS image
   Mat vpsImage((int)frameHeight, (int)frameWidth, CV_32FC1, &(d.vpsPeak[iWin][0]));
 
-  /*
-  // update background
-  if (iBgFrame < numFrames && iCenterWin < iFrame)
-  {
-    cout << "updating background" << endl;
-    ++iBgFrame;
-    capture >> newFrame;
-    cvtColor(newFrame,grayFrame,CV_BGR2GRAY);
-    backgroundNew = background + (Mat_<float>(grayFrame) - background)/bg.N;
-    accumulator = accumulator + (Mat_<float>(grayFrame) - background).mul(Mat_<float>(grayFrame) - backgroundNew);
-    background = backgroundNew;
-    sqrt(accumulator/(bg.N-1),bgStdDev);
-  }
-  */
-
-  // Mat bw0 = vpsImage > ( (bg.mean.reshape(0,(int)frameHeight) + 3*bg.stdv.reshape(0,(int)frameHeight))*(1.0f/maxChannelVal) );
+ 
   Mat bw0 = vpsImage > ( (bg.mean.reshape(0,(int)frameHeight) + 3*bg.stdv.reshape(0,(int)frameHeight)) );
   int Npix = find(bw0>0, d.pixListIdx[iWin]);
   cout << Npix << " non-zero pixels" << endl;

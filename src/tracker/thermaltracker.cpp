@@ -72,10 +72,10 @@ void Track::write_blobs(std::ostream& strm) const
 		if (b<(Nblobs-1)) points.push_back(blobs[b+1].centroid());		
 			
 		Vec4f line_fit;
-		cout << "fitting line..." ;
+		//cout << "fitting line..." ;
 		fitLine(points,line_fit, CV_DIST_L2, 0.0, 0.01, 0.01);
 		double flight_dir = atan2(line_fit[1],line_fit[0]) * 180/PI;
-		cout << " angle is " << flight_dir << " deg." << endl;
+		//cout << " angle is " << flight_dir << " deg." << endl;
 		
 		// rotate points
 		//Mat A(2,2,CV_64F);
@@ -102,28 +102,6 @@ void Track::write_blobs(std::ostream& strm) const
 		<< R.width << ","            // Note: this is length in direction of flight
 		<< R.height << endl;
 		
-		// old style
-		/*
-		// blob header
-		strm << "blob " << b << " of track id " << _id << "," << blobs[b].frame << ","
-		<< std::fixed << std::setprecision(2)
-		<< blobs[b].rect.x << ","
-		<< blobs[b].rect.y << ","
-		<< blobs[b].rect.width << ","
-		<< blobs[b].rect.height 
-		<< std::endl;
-		// blob image
-		int Ncols = blobs[b].image.cols;
-		int Nrows = blobs[b].image.rows;
-		strm << std::fixed << std::setprecision(2);
-		for (int y=0; y<Nrows; ++y)
-		{	
-			strm << blobs[b].image.at<PixelValue>(y,0);
-			for (int x=1; x<Ncols; ++x)
-				strm  << "," << blobs[b].image.at<PixelValue>(y,x);
-			strm << std::endl;
-		}
-		*/
 	}
 	
 }

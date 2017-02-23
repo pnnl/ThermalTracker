@@ -207,7 +207,7 @@ int extractTracks(Parameters params) {
             if (groupPix.size() >= params.minObjectPix)
 			{
 				igrp++;
-				cout << "new group " << igrp << " with " << groupPix.size() << " pixels" << endl;
+				//cout << "new group " << igrp << " with " << groupPix.size() << " pixels" << endl;
 				for (int j=0;j<groupPix.size();++j)
 				{
 					Point2i pnt = idx2pnt(groupPix[j],frameWidth);
@@ -261,13 +261,13 @@ int extractTracks(Parameters params) {
         
         // de-activate tracks that are old
         std::vector<Track>::iterator iter = active_tracks.begin();
-        cout << "checking active tracks:  firstNewFrame = " << firstNewFrame << ", maxFrameDiff = " << params.maxFrameDiff << endl;
+        //cout << "checking active tracks:  firstNewFrame = " << firstNewFrame << ", maxFrameDiff = " << params.maxFrameDiff << endl;
         while ( iter != active_tracks.end() )
         {
             //if ( active_tracks[k].frameEnd() < (firstNewFrame - p.maxFrameDiff) )
             if ( iter->frameEnd() < (firstNewFrame - params.maxFrameDiff) )
             {
-                cout << "deactivating track id " << iter->id() << " with last frame " << iter->frameEnd() << endl;
+                //cout << "deactivating track id " << iter->id() << " with last frame " << iter->frameEnd() << endl;
                 if (iter->nblobs() >= params.minTrackObjects)
                     complete_tracks.push_back(*iter);
                 iter = active_tracks.erase(iter);
@@ -290,7 +290,7 @@ int extractTracks(Parameters params) {
 			if ( blobs[igrp].frame < firstNewFrame ) 
 				continue;
             FrameNumber curFrame = blobs[igrp].frame;
-            cout << endl << "current blob is " << igrp << ", current frame is " << curFrame << endl;
+            //cout << endl << "current blob is " << igrp << ", current frame is " << curFrame << endl;
 				
             Point2i center = Point2i(blobs[igrp].rect.x + blobs[igrp].centroidx, blobs[igrp].rect.y + blobs[igrp].centroidy);
                  
@@ -311,13 +311,13 @@ int extractTracks(Parameters params) {
                 if ( active_tracks.empty() )
                 {
                     // start a new track
-                    cout << "starting new track" << endl;
+                    //cout << "starting new track" << endl;
                     ++id;
                     active_tracks.push_back(Track(id,blobs[igrp]));
                     continue;
                 }
                 int Nactive = active_tracks.size();
-                cout << Nactive << " active tracks" << endl;
+                //cout << Nactive << " active tracks" << endl;
 				std::vector<size_t> candidatesIdx;
 				std::vector<double> blobDist;      // distance of blob from last blob in track
                 std::vector<int> blobFrameDiff;    // difference in frames from last blob in track
@@ -327,7 +327,7 @@ int extractTracks(Parameters params) {
                 //cout << "distance from tracks: " << endl;
                 for (int k=0; k<Nactive; ++k)
 				{
-                    cout << "    id " << active_tracks[k].id() << "frameEnd=" << active_tracks[k].frameEnd();
+                    //cout << "    id " << active_tracks[k].id() << "frameEnd=" << active_tracks[k].frameEnd();
                     if ( (active_tracks[k].frameEnd() <= curFrame)
                         && (curFrame < (active_tracks[k].frameEnd() + params.maxFrameDiff)) )
 					{
@@ -340,11 +340,9 @@ int extractTracks(Parameters params) {
 							dist = std::min(dist,
                                         -pointPolygonTest(blobs[igrp].contour, active_tracks[k].back().contour[j],true));
                             // NOTE:  Ignoring overlap (negative distance) is bad.  Overlap blobs should be preferred.
-                            //double pdist = std::min(0.0,-pointPolygonTest(blobs[igrp].contour, active_tracks[k].back().contour[j],true));
-                            //dist = std::min(dist,pdist);
                         } // for each contour point
-                        cout << " dist=" << dist;
-                       // if ((active_tracks[k].frameEnd() == curFrame) && (dist > 2)) { cout << "min dist > 2" << endl; continue;} // why?
+                        //cout << " dist=" << dist;
+                       
 						if (dist < maxDist)
 						{
 							candidatesIdx.push_back(k);
@@ -352,19 +350,19 @@ int extractTracks(Parameters params) {
                             blobFrameDiff.push_back(curFrame-active_tracks[k].frameEnd());
                             spaceTimeDist.push_back(dist/maxDist + (double)blobFrameDiff.back()/(double)params.maxFrameDiff);
                            // cout << "    id " << active_tracks[k].id() << "," << blobDist.back() << "," << blobFrameDiff.back() << "," << spaceTimeDist.back() << endl;
-                            cout << " score=" << spaceTimeDist.back();
+                           // cout << " score=" << spaceTimeDist.back();
 						} // dist < maxDist
 					} // frameDiff < maxFrameDiff
                     cout << endl;
 				} // for each active track
                 cout << endl;
 				int Nfound = candidatesIdx.size();
-				cout << "found " << Nfound << " candidate tracks" << endl;
+				//cout << "found " << Nfound << " candidate tracks" << endl;
                 
 				if (Nfound==0)
                 {
                     // start a new track
-                    cout << "starting new track id " << (id+1) << endl;
+                   // cout << "starting new track id " << (id+1) << endl;
                     ++id;
                     active_tracks.push_back(Track(id, blobs[igrp]));
                     continue;
@@ -373,7 +371,7 @@ int extractTracks(Parameters params) {
                 // index of closest track
                 int minIdx = distance(spaceTimeDist.begin(),min_element(spaceTimeDist.begin(),spaceTimeDist.end()));
                 //cout << "best match is candidate " << minIdx << " with score " << spaceTimeDist[minIdx] << endl;
-				cout << "best match is id " << active_tracks[candidatesIdx[minIdx]].id() << ", with score " << spaceTimeDist[minIdx] << endl;
+				//cout << "best match is id " << active_tracks[candidatesIdx[minIdx]].id() << ", with score " << spaceTimeDist[minIdx] << endl;
 				// add to track
 				active_tracks[candidatesIdx[minIdx]].push_back(blobs[igrp]);
                 if (VIEW)
@@ -433,28 +431,6 @@ int extractTracks(Parameters params) {
     
 	//-------------------------------------------------------------------------------------
 	// SAVE RESULTS
-	/*
-	for (int k=0;k<complete_tracks.size();++k)
-    {
-		for (int b=0; b<complete_tracks[k].nblobs(); ++b)
-		{
-			cout << "blob " << b << " of track " << complete_tracks[k]._id << endl;
-			test_blob_image(complete_tracks[k].blobs[b]);
-		}
-    }
-	return 0;
-	 */
-	/*
-    ostringstream trkcsvfile;
-    trkcsvfile << outpath << "-tracks.csv";
-    ofstream csvfile(trkcsvfile.str().c_str(), ios::out | ios::trunc);
-    
-    for (int k=0;k<complete_tracks.size();++k)
-    {
-        complete_tracks[k].write_centroids(csvfile);
-    }
-    csvfile.close();
-	*/
 	filesystem::path outfilepath(vpsfilepath);
 	outfilepath.replace_extension(".trk");
 	cout << "saving data to " << outfilepath << endl;
