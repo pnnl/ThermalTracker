@@ -1,3 +1,9 @@
+cmake_minimum_required (VERSION 3.0.0)
+project (THERMALTRACKER) 
+
+# EDIT THIS LINE TO POINT TO THE ROOT QT DIRECTORY
+set(QT_VERSION_DIR /usr/local/opt/qt)
+
 if(QT_VERSION_DIR)
   file(TO_CMAKE_PATH ${QT_VERSION_DIR}/lib/cmake/Qt5Widgets Qt5Widgets_DIR)
 else()

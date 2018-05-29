@@ -1,3 +1,11 @@
+cmake_minimum_required (VERSION 3.0.0)
+project (THERMALTRACKER) 
+
+find_package(Boost REQUIRED COMPONENTS filesystem system program_options)
+# NOTE: imread/imwrite and friends were moved from highgui to a new imgcodecs module in 3
+# also, video -> videoio
+find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc videoio imgcodecs)
+
 include_directories(${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 SET (TRACK_SRCS trackfile.cpp utilities.cpp thermaltracker.cpp)

@@ -25,7 +25,6 @@ else()
   set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 endif()
 
-
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED COMPONENTS filesystem system program_options)
 find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc video)
