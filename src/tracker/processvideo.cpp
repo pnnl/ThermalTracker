@@ -130,30 +130,50 @@ for (int k=0; k<bg.N; ++k)
   cvtColor(newFrame.reshape(0,1),grayFrame,CV_BGR2GRAY);
   grayFrame.convertTo(bg.win.row(k), CV_32F, 1.0f/maxChannelVal, 0);
   
-  // the following is nice at command line but not so good
-  // in the GUI
-  /*
-  cout << "\r" << setw(5) << k+1 << ": ";
-  int X = ((float)(k+1)/bg.N) *10;
-  cout << std::string(X, '|');
-  cout << std::string(10-X, '-');
-  cout.flush();
-  */
-}
 cout << " done!" << endl;
-reduce(bg.win, bg.mean, 0, CV_REDUCE_AVG);
+
+bg.mean = Mat::zeros(1,bg.Npixels,CV_32FC1);
+bg.stdv = Mat::zeros(1,bg.Npixels,CV_32FC1);
+
+for (int k=3; k<bg.Npixels; k+=4)
+{
+//int k=7;
+  vector<Mat> channels;
+  channels.push_back(bg.win.col(k-3));
+  channels.push_back(bg.win.col(k-2));
+  channels.push_back(bg.win.col(k-1));
+  channels.push_back(bg.win.col(k));
+  Mat pix;
+  merge(channels, pix); // pix is N x 1
+  Mat pixmean, pixstdv, pixmean32, pixstdv32;
+  meanStdDev(pix, pixmean, pixstdv); // pixmean, pix stdv are 4 x 1, 1 channel, double
+  //cout << pixmean.at<double>(0) << " " << pixmean.at<double>(1) << " " << pixmean.at<double>(2) << endl;
+  pixmean.convertTo(pixmean32, CV_32FC1);
+  bg.mean.colRange(k-3,k+1) = pixmean32.t();
+  //cout << bg.mean.colRange(k-3,k+1).at<float>(0) << " " << bg.mean.colRange(k-3,k+1).at<float>(1) << " " << bg.mean.colRange(k-3,k+1).at<float>(2) << endl;
+  pixstdv.convertTo(pixstdv32, CV_32FC1);
+  bg.stdv.colRange(k-3,k+1) = pixstdv32.t();
+}
+// do the last columns in case bg.Npixels modulo 4 > 0 
+vector<Mat> channels;
+channels.push_back(bg.win.col(bg.Npixels-3));
+channels.push_back(bg.win.col(bg.Npixels-2));
+channels.push_back(bg.win.col(bg.Npixels-1));
+Mat pix;
+merge(channels, pix); // pix is N x 1
+Mat pixmean, pixstdv, pixmean32, pixstdv32;
+meanStdDev(pix, pixmean, pixstdv); // pixmean, pix stdv are 4 x 1
+pixmean.convertTo(pixmean32, CV_32FC1);
+bg.mean.colRange(bg.Npixels-3,bg.Npixels) = pixmean.t();
+pixstdv.convertTo(pixstdv32, CV_32FC1);
+bg.stdv.colRange(bg.Npixels-3,bg.Npixels) = pixstdv.t();
+
 double minVal, maxVal;
 minMaxIdx(bg.mean, &minVal, &maxVal, 0, 0);
 cout << "background mean intensity from " << minVal << " to " << maxVal << endl;
-
-Mat sq_diff;
-pow(bg.win - repeat(bg.mean, bg.N, 1),2.0f,sq_diff);
-Mat bg_var;
-reduce(sq_diff, bg_var, 0, CV_REDUCE_SUM);
-bg_var = bg_var/(bg.N-1);
-sqrt(bg_var, bg.stdv);
 minMaxIdx(bg.stdv, &minVal, &maxVal, 0, 0);
 cout << "background intensity standard deviation from " << minVal << " to " << maxVal << endl;
+
 
 iFrame += bg.N;  // frame index
 
@@ -282,14 +302,39 @@ while ( ind < (bg.N - vpsFrames + 1) )
     cvtColor(newFrame.reshape(0,1),grayFrame,CV_BGR2GRAY);
     grayFrame.convertTo(bg.win.row(k), CV_32F, 1.0f/maxChannelVal, 0);
   }
-  reduce(bg.win, bg.mean, 0, CV_REDUCE_AVG);
-
-  Mat sq_diff;
-  pow(bg.win - repeat(bg.mean, bg.N, 1),2.0f,sq_diff);
-  Mat bg_var;
-  reduce(sq_diff, bg_var, 0, CV_REDUCE_SUM);
-  bg_var = bg_var/(bg.N-1);
-  sqrt(bg_var, bg.stdv);
+  
+  for (int k=3; k<bg.Npixels; k+=4)
+{
+//int k=7;
+  vector<Mat> channels;
+  channels.push_back(bg.win.col(k-3));
+  channels.push_back(bg.win.col(k-2));
+  channels.push_back(bg.win.col(k-1));
+  channels.push_back(bg.win.col(k));
+  Mat pix;
+  merge(channels, pix); // pix is N x 1
+  Mat pixmean, pixstdv, pixmean32, pixstdv32;
+  meanStdDev(pix, pixmean, pixstdv); // pixmean, pix stdv are 4 x 1, 1 channel, double
+ // cout << pixmean.at<double>(0) << " " << pixmean.at<double>(1) << " " << pixmean.at<double>(2) << endl;
+  pixmean.convertTo(pixmean32, CV_32FC1);
+  bg.mean.colRange(k-3,k+1) = pixmean32.t();
+  //cout << bg.mean.colRange(k-3,k+1).at<float>(0) << " " << bg.mean.colRange(k-3,k+1).at<float>(1) << " " << bg.mean.colRange(k-3,k+1).at<float>(2) << endl;
+  pixstdv.convertTo(pixstdv32, CV_32FC1);
+  bg.stdv.colRange(k-3,k+1) = pixstdv32.t();
+}
+// do the last columns in case bg.Npixels modulo 4 > 0 
+vector<Mat> channels;
+channels.push_back(bg.win.col(bg.Npixels-3));
+channels.push_back(bg.win.col(bg.Npixels-2));
+channels.push_back(bg.win.col(bg.Npixels-1));
+Mat pix;
+merge(channels, pix); // pix is N x 1
+Mat pixmean, pixstdv, pixmean32, pixstdv32;
+meanStdDev(pix, pixmean, pixstdv); // pixmean, pix stdv are 4 x 1
+pixmean.convertTo(pixmean32, CV_32FC1);
+bg.mean.colRange(bg.Npixels-3,bg.Npixels) = pixmean.t();
+pixstdv.convertTo(pixstdv32, CV_32FC1);
+bg.stdv.colRange(bg.Npixels-3,bg.Npixels) = pixstdv.t();
 
   iFrame += halfFrames;
 } // MAIN LOOP
