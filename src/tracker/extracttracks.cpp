@@ -208,10 +208,12 @@ int extractTracks(Parameters params) {
 			{
 				igrp++;
 				//cout << "new group " << igrp << " with " << groupPix.size() << " pixels" << endl;
+                /*
 				for (int j=0;j<groupPix.size();++j)
 				{
 					Point2i pnt = idx2pnt(groupPix[j],frameWidth);
  				}
+                */
                 Blob newblob(d.vpsPkFrame[iWin][groupPix[0]] + d.vpsFrameStart[iWin], // frame number
                              groupPix, (Mat_<PixelValue>)im);
 				// TO DO:  This is kludgy.  Fix blob contructor.
@@ -406,7 +408,15 @@ int extractTracks(Parameters params) {
 			
 		if (0<all_tracks.size()) {
 			v.MakeOutputImage(imc_out, wtxt, all_tracks, d.vpsFrameStart[iWin], d.vpsFrameEnd[iWin]);
-            drawContours(imc_out, blobcontours, -1, CV_RGB(0,128,0), 1, 8, noArray(), INT_MAX, Point2i(0, 0));
+            std::vector< std::vector<Point2i> >  trackblobs;
+            for (int k=0; k<all_tracks.size(); ++k)
+            {
+                for (int j=0; j<all_tracks[k].nblobs(); ++j)
+                {
+                    trackblobs.push_back(all_tracks[k].blobs[j].contour);
+                }
+            }
+            drawContours(imc_out, trackblobs, -1, CV_RGB(0,128,0), 1, 8, noArray(), INT_MAX, Point2i(0, 0));
 			string fname = outpath + "_" + elapsedVideoTime2(d.vpsFrameStart[iWin],header.fps) + "_trks.png"; 
 			imwrite(fname,imc_out);
 		}

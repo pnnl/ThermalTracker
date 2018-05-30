@@ -28,10 +28,10 @@ Blob::Blob(const FrameNumber& fn, const std::vector<unsigned>& ipixels, const Ma
 		matMask.at<unsigned char>( idx2pnt(ipixels[j],frameimage.cols) ) = 255; //
 	}
 	
-	// NOTE:  This is good. Without morphing, very noisy blob contours.
+	// NOTE:  Without morphing, very noisy blob contours.
 	Mat newMask;
-	//morphologyEx(matMask, newMask, MORPH_CLOSE, Mat());
-	//morphologyEx(newMask, matMask, MORPH_OPEN, Mat());
+	morphologyEx(matMask, newMask, MORPH_CLOSE, Mat());
+	morphologyEx(newMask, matMask, MORPH_OPEN, Mat());
 	std::vector< std::vector<Point2i> > contours;
 	findContours(matMask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE); 
 	if (!contours.empty()) 
