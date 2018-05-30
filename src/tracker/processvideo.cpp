@@ -25,47 +25,47 @@ namespace fs = boost::filesystem;
 
 int processVideo(Parameters params) {
 
-if (params.inputFile() == "") {
-  cerr << "Must specify a file to analyze" << endl;
-  return -1;
-}
+  if (params.inputFile() == "") {
+    cerr << "Must specify a file to analyze" << endl;
+    return -1;
+  }
 
-fs::path vfilepath(params.inputFile());
+  fs::path vfilepath(params.inputFile());
 
 //If the output path is specified, use it, otherwise use the default _out behavior
 //and parse it out of the input file name.
-string outpath;
-if (params.outputDir() != "") {
-  outpath = params.outputDir() + vfilepath.stem().string();
-  fs::create_directories(fs::path(outpath).parent_path());
-} else {
-  generate_outpath_str(vfilepath.make_preferred().string(), outpath);
-  fs::create_directory(fs::path(outpath).parent_path());
-}
+  string outpath;
+  if (params.outputDir() != "") {
+    outpath = params.outputDir() + vfilepath.stem().string();
+    fs::create_directories(fs::path(outpath).parent_path());
+  } else {
+    generate_outpath_str(vfilepath.make_preferred().string(), outpath);
+    fs::create_directory(fs::path(outpath).parent_path());
+  }
 
 // text on output image
-Point2i wintextOrigin(20,10);
-int     wintextFont = FONT_HERSHEY_PLAIN;
-double  wintextScale = 1;
+  Point2i wintextOrigin(20,10);
+  int     wintextFont = FONT_HERSHEY_PLAIN;
+  double  wintextScale = 1;
 
 //************************************************************************** 
 // OPEN VIDEO FILE
 //************************************************************************** 
-VideoCapture capture(vfilepath.string());
+  VideoCapture capture(vfilepath.string());
 
-if ( !capture.isOpened() )
-{
-  cerr << "Could not open file " << vfilepath.string() << endl;
-  return -1;
-}
+  if ( !capture.isOpened() )
+  {
+    cerr << "Could not open file " << vfilepath.string() << endl;
+    return -1;
+  }
 
-cout << endl;
-cout << endl << "Processing file " << vfilepath.string() << endl;
-cout << "with " << params.windowSize << " second windows" << endl;
+  cout << endl;
+  cout << endl << "Processing file " << vfilepath.string() << endl;
+  cout << "with " << params.windowSize << " second windows" << endl;
 
-double frameHeight  = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-double frameWidth   = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-int    numFrames    = (int)capture.get(CV_CAP_PROP_FRAME_COUNT);
+  double frameHeight  = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+  double frameWidth   = capture.get(CV_CAP_PROP_FRAME_WIDTH);
+  int    numFrames    = (int)capture.get(CV_CAP_PROP_FRAME_COUNT);
 
 if ( !(params.framesPerSecond > 0) ) params.framesPerSecond = capture.get(CV_CAP_PROP_FPS); // the FPS property returned is sometimes wrong, so user can specify
 
@@ -84,17 +84,17 @@ float maxChannelVal=0;
 switch (newFrame.depth())
 {
   case CV_8U:
-    maxChannelVal = 255.0f;
-    cout << "frame depth is 8U, channels = " << newFrame.channels() << endl;
-    break;
+  maxChannelVal = 255.0f;
+  cout << "frame depth is 8U, channels = " << newFrame.channels() << endl;
+  break;
   case CV_16U:
-    maxChannelVal = 65535.0f;
-    cout << "frame depth is 16U, channels = " << newFrame.channels() << endl;
-    break;
+  maxChannelVal = 65535.0f;
+  cout << "frame depth is 16U, channels = " << newFrame.channels() << endl;
+  break;
   case CV_32F:
-    maxChannelVal = 1.0f;
-    cout << "frame depth is 32F, channels = " << newFrame.channels() << endl;
-    break;
+  maxChannelVal = 1.0f;
+  cout << "frame depth is 32F, channels = " << newFrame.channels() << endl;
+  break;
 }
 
 
@@ -124,20 +124,19 @@ for (int k=0; k<bg.N; ++k)
 {
   capture >> newFrame;  // 3-channel BGR, all equal intensity
   if(newFrame.empty()){
-	  cout << "\r" << "Frame at index: " << k << " is empty.";
-	  continue;
-  }
+   cout << "\r" << "Frame at index: " << k << " is empty.";
+   continue;
+   }
   cvtColor(newFrame.reshape(0,1),grayFrame,CV_BGR2GRAY);
   grayFrame.convertTo(bg.win.row(k), CV_32F, 1.0f/maxChannelVal, 0);
-  
+}
 cout << " done!" << endl;
 
-bg.mean = Mat::zeros(1,bg.Npixels,CV_32FC1);
-bg.stdv = Mat::zeros(1,bg.Npixels,CV_32FC1);
+ bg.mean = Mat::zeros(1,bg.Npixels,CV_32FC1);
+ bg.stdv = Mat::zeros(1,bg.Npixels,CV_32FC1);
 
-for (int k=3; k<bg.Npixels; k+=4)
-{
-//int k=7;
+ for (int k=3; k<bg.Npixels; k+=4)
+ {
   vector<Mat> channels;
   channels.push_back(bg.win.col(k-3));
   channels.push_back(bg.win.col(k-2));
@@ -174,7 +173,6 @@ cout << "background mean intensity from " << minVal << " to " << maxVal << endl;
 minMaxIdx(bg.stdv, &minVal, &maxVal, 0, 0);
 cout << "background intensity standard deviation from " << minVal << " to " << maxVal << endl;
 
-
 iFrame += bg.N;  // frame index
 
 int vpsFrames  = ceil((double)params.windowSize * params.framesPerSecond);
@@ -201,10 +199,11 @@ int waitdelay = 0; // default wait for keypress
 
 int framesRemaining;
 int ind = 0; // index into background window
+
 //************************************************************************** 
 // MAIN LOOP
 //************************************************************************** 
-//while (framesRemaining>halfFrames || ind < bg.N)
+
 while ( ind < (bg.N - vpsFrames + 1) )
 {
 
@@ -213,13 +212,13 @@ while ( ind < (bg.N - vpsFrames + 1) )
 
   framesRemaining = numFrames - d.vpsFrameEnd[iWin];
   cout << endl << "window " << iWin+1 << " of " << Nvps 
-        << ", frames remaining " << framesRemaining << endl;
+  << ", frames remaining " << framesRemaining << endl;
 
   //***********************************************************************
   // Video Peak Store
   // Mat frameStack(bg.win.rowRange(bg.N - vpsFrames,bg.N));
   Mat frameStack(bg.win.rowRange(ind, ind + vpsFrames));
- 
+
   
   // get peak values and associated frame for each pixel
   cout << "storing peak values" << endl;
@@ -229,9 +228,9 @@ while ( ind < (bg.N - vpsFrames + 1) )
     peakframe = 0;
     for (int k=0; k<vpsFrames; ++k) // for each frame in VPS window
     {
-        frame = frameStack.ptr<PixelValue>(k);
-        peakframe = (frame[j]>peakval) ? k : peakframe;
-        peakval = std::max(frame[j],peakval);
+      frame = frameStack.ptr<PixelValue>(k);
+      peakframe = (frame[j]>peakval) ? k : peakframe;
+      peakval = std::max(frame[j],peakval);
     }
     d.vpsPeak[iWin][j] = peakval;
     d.vpsPkFrame[iWin][j] = peakframe;
@@ -240,15 +239,15 @@ while ( ind < (bg.N - vpsFrames + 1) )
   // show VPS image
   cout << "frames " << d.vpsFrameStart[iWin] << " to " << d.vpsFrameEnd[iWin] << endl;
   cout << "elapsed video time " 
-       << elapsedVideoTime(d.vpsFrameStart[iWin],params.framesPerSecond) 
-       << " to " << elapsedVideoTime(d.vpsFrameEnd[iWin],params.framesPerSecond) 
-       << endl;
+  << elapsedVideoTime(d.vpsFrameStart[iWin],params.framesPerSecond) 
+  << " to " << elapsedVideoTime(d.vpsFrameEnd[iWin],params.framesPerSecond) 
+  << endl;
 
   //***********************************************************************
   // create output VPS image
   Mat vpsImage((int)frameHeight, (int)frameWidth, CV_32FC1, &(d.vpsPeak[iWin][0]));
 
- 
+
   Mat bw0 = vpsImage > ( (bg.mean.reshape(0,(int)frameHeight) + 3*bg.stdv.reshape(0,(int)frameHeight)) );
   int Npix = find(bw0>0, d.pixListIdx[iWin]);
   cout << Npix << " non-zero pixels" << endl;
@@ -261,12 +260,12 @@ while ( ind < (bg.N - vpsFrames + 1) )
 
   stringstream ss;
   ss << "Window " << iWin << ": " 
-     << elapsedVideoTime(d.vpsFrameStart[iWin],params.framesPerSecond) 
-     << " to " << elapsedVideoTime(d.vpsFrameEnd[iWin],params.framesPerSecond);
+  << elapsedVideoTime(d.vpsFrameStart[iWin],params.framesPerSecond) 
+  << " to " << elapsedVideoTime(d.vpsFrameEnd[iWin],params.framesPerSecond);
   putText(im_out, ss.str(), wintextOrigin, wintextFont, wintextScale, CV_RGB(65535,65535,65535));
   string pngfilepath = outpath + "_" 
-                           + elapsedVideoTime2(d.vpsFrameStart[iWin],params.framesPerSecond) 
-                           + ".png";
+  + elapsedVideoTime2(d.vpsFrameStart[iWin],params.framesPerSecond) 
+  + ".png";
   cout << "writing to " << pngfilepath << endl;
   imwrite(pngfilepath,im_out);
   if (params.view)
@@ -304,37 +303,36 @@ while ( ind < (bg.N - vpsFrames + 1) )
   }
   
   for (int k=3; k<bg.Npixels; k+=4)
-{
-//int k=7;
+  {
+    vector<Mat> channels;
+    channels.push_back(bg.win.col(k-3));
+    channels.push_back(bg.win.col(k-2));
+    channels.push_back(bg.win.col(k-1));
+    channels.push_back(bg.win.col(k));
+    Mat pix;
+    merge(channels, pix); // pix is N x 1
+    Mat pixmean, pixstdv, pixmean32, pixstdv32;
+    meanStdDev(pix, pixmean, pixstdv); // pixmean, pix stdv are 4 x 1, 1 channel, double
+    // cout << pixmean.at<double>(0) << " " << pixmean.at<double>(1) << " " << pixmean.at<double>(2) << endl;
+    pixmean.convertTo(pixmean32, CV_32FC1);
+    bg.mean.colRange(k-3,k+1) = pixmean32.t();
+    //cout << bg.mean.colRange(k-3,k+1).at<float>(0) << " " << bg.mean.colRange(k-3,k+1).at<float>(1) << " " << bg.mean.colRange(k-3,k+1).at<float>(2) << endl;
+    pixstdv.convertTo(pixstdv32, CV_32FC1);
+    bg.stdv.colRange(k-3,k+1) = pixstdv32.t();
+  }
+  // do the last columns in case bg.Npixels modulo 4 > 0 
   vector<Mat> channels;
-  channels.push_back(bg.win.col(k-3));
-  channels.push_back(bg.win.col(k-2));
-  channels.push_back(bg.win.col(k-1));
-  channels.push_back(bg.win.col(k));
+  channels.push_back(bg.win.col(bg.Npixels-3));
+  channels.push_back(bg.win.col(bg.Npixels-2));
+  channels.push_back(bg.win.col(bg.Npixels-1));
   Mat pix;
   merge(channels, pix); // pix is N x 1
   Mat pixmean, pixstdv, pixmean32, pixstdv32;
-  meanStdDev(pix, pixmean, pixstdv); // pixmean, pix stdv are 4 x 1, 1 channel, double
- // cout << pixmean.at<double>(0) << " " << pixmean.at<double>(1) << " " << pixmean.at<double>(2) << endl;
+  meanStdDev(pix, pixmean, pixstdv); // pixmean, pix stdv are 4 x 1
   pixmean.convertTo(pixmean32, CV_32FC1);
-  bg.mean.colRange(k-3,k+1) = pixmean32.t();
-  //cout << bg.mean.colRange(k-3,k+1).at<float>(0) << " " << bg.mean.colRange(k-3,k+1).at<float>(1) << " " << bg.mean.colRange(k-3,k+1).at<float>(2) << endl;
+  bg.mean.colRange(bg.Npixels-3,bg.Npixels) = pixmean.t();
   pixstdv.convertTo(pixstdv32, CV_32FC1);
-  bg.stdv.colRange(k-3,k+1) = pixstdv32.t();
-}
-// do the last columns in case bg.Npixels modulo 4 > 0 
-vector<Mat> channels;
-channels.push_back(bg.win.col(bg.Npixels-3));
-channels.push_back(bg.win.col(bg.Npixels-2));
-channels.push_back(bg.win.col(bg.Npixels-1));
-Mat pix;
-merge(channels, pix); // pix is N x 1
-Mat pixmean, pixstdv, pixmean32, pixstdv32;
-meanStdDev(pix, pixmean, pixstdv); // pixmean, pix stdv are 4 x 1
-pixmean.convertTo(pixmean32, CV_32FC1);
-bg.mean.colRange(bg.Npixels-3,bg.Npixels) = pixmean.t();
-pixstdv.convertTo(pixstdv32, CV_32FC1);
-bg.stdv.colRange(bg.Npixels-3,bg.Npixels) = pixstdv.t();
+  bg.stdv.colRange(bg.Npixels-3,bg.Npixels) = pixstdv.t();
 
   iFrame += halfFrames;
 } // MAIN LOOP
