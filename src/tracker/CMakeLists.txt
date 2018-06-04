@@ -4,7 +4,7 @@ project (THERMALTRACKER)
 find_package(Boost REQUIRED COMPONENTS filesystem system program_options)
 # NOTE: imread/imwrite and friends were moved from highgui to a new imgcodecs module in 3
 # also, video -> videoio
-find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc videoio imgcodecs)
+find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc video)
 
 include_directories(${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 

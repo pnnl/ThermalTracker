@@ -1,9 +1,6 @@
 cmake_minimum_required (VERSION 3.0.0)
 project (THERMALTRACKER) 
 
-# EDIT THIS LINE TO POINT TO THE ROOT QT DIRECTORY
-set(QT_VERSION_DIR /usr/local/opt/qt)
-
 if(QT_VERSION_DIR)
   file(TO_CMAKE_PATH ${QT_VERSION_DIR}/lib/cmake/Qt5Widgets Qt5Widgets_DIR)
 else()
@@ -96,8 +93,6 @@ if(${CMAKE_BUILD_TYPE} MATCHES Release)
                      COMMAND xcopy ${GUI_EXE_DIR}\\* ${CMAKE_CURRENT_BINARY_DIR}\\..\\Release\\ /e
                      COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}\\..\\Release\\tracker
                      COMMAND copy ${CMAKE_CURRENT_BINARY_DIR}\\..\\tracker\\Release\\* ${CMAKE_CURRENT_BINARY_DIR}\\..\\Release\\tracker\\
-                     COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}\\..\\Release\\doc
-                     COMMAND copy ${CMAKE_CURRENT_BINARY_DIR}\\..\\..\\..\\doc\\* ${CMAKE_CURRENT_BINARY_DIR}\\..\\Release\\doc\\
                      COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}\\..\\Release\\sample_video
                      COMMAND copy ${CMAKE_CURRENT_BINARY_DIR}\\..\\..\\..\\sample_video\\*.mp4 ${CMAKE_CURRENT_BINARY_DIR}\\..\\Release\\sample_video\\)
   
